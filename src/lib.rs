@@ -1,3 +1,7 @@
+pub mod parser;
+
+use crate::parser::*;
+
 use std::{
     io::Write,
     net::{Ipv4Addr, TcpListener, TcpStream},
@@ -19,7 +23,9 @@ pub fn run(config: Config) {
 }
 
 fn handle_connection(mut stream: TcpStream) {
-    let response = create_response();
+    let msg = parse_message(&stream);
+
+    let response = create_response(msg);
 
     let result = stream.write_all(&response);
 
@@ -33,14 +39,13 @@ fn handle_connection(mut stream: TcpStream) {
     }
 }
 
-fn create_response() -> Vec<u8> {
+fn create_response(msg: Message) -> Vec<u8> {
     let mut response: Vec<u8> = Vec::with_capacity(8);
 
-    let msg_size: u32 = 0;
-    let corr_id: u32 = 7;
+    let msg_size: i32 = 0;
 
     response.extend_from_slice(&msg_size.to_be_bytes());
-    response.extend_from_slice(&corr_id.to_be_bytes());
+    response.extend_from_slice(&msg.header.corr_id.to_be_bytes());
 
     response
 }
