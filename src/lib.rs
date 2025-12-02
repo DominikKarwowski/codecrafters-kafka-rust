@@ -39,8 +39,8 @@ fn create_response() -> Vec<u8> {
     let msg_size: u32 = 0;
     let corr_id: u32 = 7;
 
-    response.copy_from_slice(&msg_size.to_be_bytes());
-    response.copy_from_slice(&corr_id.to_be_bytes());
+    response.extend_from_slice(&msg_size.to_be_bytes());
+    response.extend_from_slice(&corr_id.to_be_bytes());
 
     response
 }
