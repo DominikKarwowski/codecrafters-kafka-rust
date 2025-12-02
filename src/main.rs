@@ -1,19 +1,11 @@
 #![allow(unused_imports)]
-use std::net::TcpListener;
+use codecrafters_kafka::{Config, run};
 
 fn main() {
     println!("Logs from your program will appear here!");
     
-    let listener = TcpListener::bind("127.0.0.1:9092").unwrap();
-    
-    for stream in listener.incoming() {
-        match stream {
-            Ok(_stream) => {
-                println!("accepted new connection");
-            }
-            Err(e) => {
-                println!("error: {}", e);
-            }
-        }
-    }
+    let config = Config::default();
+
+    run(config);
 }
+
