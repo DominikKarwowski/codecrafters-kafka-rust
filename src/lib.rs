@@ -47,7 +47,19 @@ fn create_response(msg: Message) -> Vec<u8> {
     response.extend_from_slice(&msg_size.to_be_bytes());
     response.extend_from_slice(&msg.header.corr_id.to_be_bytes());
 
+    let response_code: i16 = if is_api_ver_valid(&msg.header.req_api_ver) { 0 } else { 35 };
+
+    response.extend_from_slice(&response_code.to_be_bytes());
+
     response
+}
+
+fn is_api_ver_valid(api_ver: &i16) -> bool {
+    if *api_ver <= 4 {
+        true
+    } else {
+        false
+    }
 }
 
 pub struct Config {
