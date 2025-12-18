@@ -50,7 +50,7 @@ fn create_response(msg: Message) -> Vec<u8> {
 
     append_response_body(&mut response, &msg.header.req_api_key);
 
-    update_msg_length(&mut response);
+    update_msg_size(&mut response);
 
     response
 }
@@ -81,9 +81,9 @@ fn append_response_body(response: &mut Vec<u8>, api_key: &i16) {
     response.append(&mut body);
 }
 
-fn update_msg_length(response: &mut Vec<u8>) {
-    let msg_len = response.len() - 4;
-    response[0..4].copy_from_slice(&msg_len.to_be_bytes());
+fn update_msg_size(response: &mut Vec<u8>) {
+    let msg_size: i32 = (response.len() - 4) as i32;
+    response[0..4].copy_from_slice(&msg_size.to_be_bytes());
 }
 
 fn is_api_ver_valid(api_ver: &i16) -> bool {
