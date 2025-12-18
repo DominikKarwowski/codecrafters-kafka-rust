@@ -65,20 +65,32 @@ fn append_response_header(response: &mut Vec<u8>, corr_id: &i32) {
 fn append_response_body(response: &mut Vec<u8>, api_key: &i16) {
     let mut body: Vec<u8> = Vec::new();
 
-    let min_ver: i16 = 0;
-    let max_ver: i16 = 4;
-    let tag_buffer: i8 = 0;
-    let throttle_time_ms: i32 = 0;
-
     body.push(0);
-    body.extend_from_slice(&api_key.to_be_bytes());
-    body.extend_from_slice(&min_ver.to_be_bytes());
-    body.extend_from_slice(&max_ver.to_be_bytes());
-    body.extend_from_slice(&tag_buffer.to_be_bytes());
+
+    let api_keys_count = add_api_key(&mut body, &api_key);
+
+    body[0] = (api_keys_count + 1) as u8;
+
+    let throttle_time_ms: i32 = 0;
+    let tag_buffer: i8 = 0;
+    
     body.extend_from_slice(&throttle_time_ms.to_be_bytes());
     body.extend_from_slice(&tag_buffer.to_be_bytes());
 
     response.append(&mut body);
+}
+
+fn add_api_key(body: &mut Vec<u8>, api_key: &i16) -> i8 {  
+    let min_ver: i16 = 0;
+    let max_ver: i16 = 4;
+    let tag_buffer: i8 = 0;
+
+    body.extend_from_slice(&api_key.to_be_bytes());
+    body.extend_from_slice(&min_ver.to_be_bytes());
+    body.extend_from_slice(&max_ver.to_be_bytes());
+    body.extend_from_slice(&tag_buffer.to_be_bytes());
+
+    body.len() as i8
 }
 
 fn update_msg_size(response: &mut Vec<u8>) {
