@@ -67,9 +67,9 @@ fn append_response_body(response: &mut Vec<u8>, api_key: &i16) {
 
     body.push(0);
 
-    let api_keys_count = add_api_key(&mut body, &api_key);
+    add_api_key(&mut body, &api_key);
 
-    body[0] = (api_keys_count + 1) as u8;
+    body[0] = 2;
 
     let throttle_time_ms: i32 = 0;
     let tag_buffer: i8 = 0;
@@ -80,7 +80,7 @@ fn append_response_body(response: &mut Vec<u8>, api_key: &i16) {
     response.append(&mut body);
 }
 
-fn add_api_key(body: &mut Vec<u8>, api_key: &i16) -> i8 {  
+fn add_api_key(body: &mut Vec<u8>, api_key: &i16) {
     let min_ver: i16 = 0;
     let max_ver: i16 = 4;
     let tag_buffer: i8 = 0;
@@ -89,8 +89,6 @@ fn add_api_key(body: &mut Vec<u8>, api_key: &i16) -> i8 {
     body.extend_from_slice(&min_ver.to_be_bytes());
     body.extend_from_slice(&max_ver.to_be_bytes());
     body.extend_from_slice(&tag_buffer.to_be_bytes());
-
-    body.len() as i8
 }
 
 fn update_msg_size(response: &mut Vec<u8>) {
