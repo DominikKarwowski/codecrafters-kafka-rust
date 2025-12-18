@@ -42,16 +42,48 @@ fn handle_connection(mut stream: TcpStream) {
 fn create_response(msg: Message) -> Vec<u8> {
     let mut response: Vec<u8> = Vec::with_capacity(8);
 
+    append_response_header(&mut response, &msg.header.corr_id);
+
+    let error_code: i16 = if is_api_ver_valid(&msg.header.req_api_ver) { 0 } else { 35 };
+
+    response.extend_from_slice(&error_code.to_be_bytes());
+
+    append_response_body(&mut response, &msg.header.req_api_key);
+
+    update_msg_length(&mut response);
+
+    response
+}
+
+fn append_response_header(response: &mut Vec<u8>, corr_id: &i32) { 
     let msg_size: i32 = 0;
 
     response.extend_from_slice(&msg_size.to_be_bytes());
-    response.extend_from_slice(&msg.header.corr_id.to_be_bytes());
+    response.extend_from_slice(&corr_id.to_be_bytes());
+}
 
-    let response_code: i16 = if is_api_ver_valid(&msg.header.req_api_ver) { 0 } else { 35 };
+fn append_response_body(response: &mut Vec<u8>, api_key: &i16) {
+    let mut body: Vec<u8> = Vec::new();
 
-    response.extend_from_slice(&response_code.to_be_bytes());
+    let min_ver: i16 = 0;
+    let max_ver: i16 = 4;
+    let tag_buffer: i8 = 0;
+    let throttle_time_ms: i32 = 0;
 
-    response
+    body.push(0);
+    body.extend_from_slice(&api_key.to_be_bytes());
+    body.extend_from_slice(&min_ver.to_be_bytes());
+    body.extend_from_slice(&max_ver.to_be_bytes());
+    body.extend_from_slice(&tag_buffer.to_be_bytes());
+    body.extend_from_slice(&throttle_time_ms.to_be_bytes());
+    body.extend_from_slice(&tag_buffer.to_be_bytes());
+
+    response.append(&mut body);
+}
+
+fn update_msg_length(response: &mut Vec<u8>) {
+    let msg_len = response.len() - 4;
+    response[0..4].copy_from_slice(&msg_len.to_be_bytes());
 }
 
 fn is_api_ver_valid(api_ver: &i16) -> bool {
@@ -87,3 +119,4 @@ impl Config {
         format!("{}:{}", self.host_addr, self.port)
     }
 }
+
